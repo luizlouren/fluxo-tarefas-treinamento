@@ -1,0 +1,15 @@
+{
+  "requestId": "21641e47-68c0-427a-af71-7c0a07dce464",
+  "outcome": "code",
+  "publicText": "Olá! Obrigado pelo pedido. Trocamos o texto do botão de confirmar do diálogo \"Novo quadro\" de \"Criar quadro\" para \"Criar meu quadro\". Nenhum outro texto foi alterado.",
+  "agents": ["n1", "po", "desenvolvedor", "revisor"],
+  "allowedFiles": ["client/src/App.jsx"],
+  "criteria": [
+    { "id": "c1", "description": "O botão submit do diálogo Novo quadro mostra \"Criar meu quadro\"; o botão da tela inicial e os demais textos continuam iguais." }
+  ],
+  "review": { "status": "ok", "note": "O Revisor não pôde rodar git diff (sem permissão); o coordenador conferiu: só a linha 336 de client/src/App.jsx mudou e npm run build passou." },
+  "updates": [
+    { "id": "u1", "agent": "n1", "internalText": "Pedido pequeno, dentro da política (trecho de quadros do App.jsx).", "publicText": "Recebemos o pedido de trocar o texto do botão do diálogo Novo quadro." },
+    { "id": "u2", "agent": "desenvolvedor", "internalText": "Texto do submit na linha 336 trocado; build verde.", "publicText": "O botão agora mostra \"Criar meu quadro\"." }
+  ]
+}
