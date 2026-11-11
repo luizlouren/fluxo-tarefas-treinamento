@@ -1,0 +1,25 @@
+{
+  "produto": "Fluxo",
+  "descricao": "Quadro de tarefas no estilo Trello, com quadros, listas, cartões e atendimento por tickets.",
+  "situacao": "Projeto de aula, rodando local. Não é um produto comercial à venda.",
+  "preco": null,
+  "planos": null,
+  "prazo_de_entrega": null,
+  "suporte": "Tickets dentro do próprio app (menu Atendimento). Sem horário ou prazo de resposta definidos.",
+  "recursos_existentes": [
+    "quadros",
+    "listas",
+    "cartões com título e descrição",
+    "mover cartões por arrastar ou pelo menu",
+    "atendimento por tickets"
+  ],
+  "recursos_inexistentes": [
+    "login na interface",
+    "equipe e convites",
+    "etiquetas",
+    "datas de entrega",
+    "anexos",
+    "notificações"
+  ],
+  "regra": "Qualquer campo null é desconhecido. Não invente: responda que não há informação e faça uma pergunta curta."
+}
