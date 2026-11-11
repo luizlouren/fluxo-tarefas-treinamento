@@ -2,7 +2,7 @@ import { Botao } from "./componentes/Botao.jsx";
 import { Icone } from "./componentes/Icone.jsx";
 
 /** Lateral com a lista de quadros e o atalho para criar um novo. */
-export function BarraLateral({ quadros, quadroId, aoSelecionar, aoNovoQuadro, aoRenomear, aoExcluir }) {
+export function BarraLateral({ tela = "quadros", aoTrocarTela, atendimento, quadros, quadroId, aoSelecionar, aoNovoQuadro, aoRenomear, aoExcluir }) {
   return (
     <aside className="lateral" aria-label="Quadros">
       <a className="marca" href="/" aria-label="Fluxo, voltar ao início" style={{ textDecoration: "none" }}>
@@ -12,6 +12,16 @@ export function BarraLateral({ quadros, quadroId, aoSelecionar, aoNovoQuadro, ao
         <span className="marca-nome">Fluxo</span>
       </a>
 
+      <nav className="lateral-nav" aria-label="Seções">
+        <button type="button" className="lateral-nav-item" data-ativo={tela === "quadros" ? "" : undefined} aria-current={tela === "quadros" ? "page" : undefined} onClick={() => aoTrocarTela("quadros")}>
+          <Icone nome="colunas" tamanho={18} /> Quadros
+        </button>
+        <button type="button" className="lateral-nav-item" data-ativo={tela === "atendimento" ? "" : undefined} aria-current={tela === "atendimento" ? "page" : undefined} onClick={() => aoTrocarTela("atendimento")}>
+          <Icone nome="chat" tamanho={18} /> Atendimento
+        </button>
+      </nav>
+
+      {tela === "atendimento" ? atendimento : <>
       <div className="lateral-topo">
         <h2 className="lateral-titulo">Quadros</h2>
         <Botao variante="fantasma" icone="mais" aria-label="Criar quadro" onClick={aoNovoQuadro} />
@@ -43,6 +53,7 @@ export function BarraLateral({ quadros, quadroId, aoSelecionar, aoNovoQuadro, ao
       ) : (
         <p className="lateral-vazio">Nenhum quadro ainda. Crie o primeiro para começar.</p>
       )}
+      </>}
     </aside>
   );
 }

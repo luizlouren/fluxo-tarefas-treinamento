@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "./api.js";
 import { BarraLateral } from "./BarraLateral.jsx";
 import { TelaQuadro } from "./TelaQuadro.jsx";
+import { ListaTickets, TelaAtendimento, useAtendimento } from "./Atendimento.jsx";
 import { Botao } from "./componentes/Botao.jsx";
 import { Campo } from "./componentes/Campo.jsx";
 import { Confirmar } from "./componentes/Confirmar.jsx";
@@ -43,6 +44,13 @@ export function App() {
   const [erro, setErro] = useState(null);
   const [dialogo, setDialogo] = useState(null);
   const [tentativa, setTentativa] = useState(0);
+  const [tela, setTela] = useState(() => (window.location.hash === "#atendimento" ? "atendimento" : "quadros"));
+  const atend = useAtendimento(tela === "atendimento");
+
+  const trocarTela = (nova) => {
+    setTela(nova);
+    window.history.replaceState(null, "", nova === "atendimento" ? "#atendimento" : window.location.pathname);
+  };
 
   // Quadros: a lista vem da API e define qual quadro fica aberto.
   useEffect(() => {
@@ -256,6 +264,9 @@ export function App() {
   return (
     <div className="app">
       <BarraLateral
+        tela={tela}
+        aoTrocarTela={trocarTela}
+        atendimento={<ListaTickets tickets={atend.tickets} ticketId={atend.ticketId} aoAbrir={atend.abrir} aoNovo={atend.novo} aoExcluir={(ticket) => setDialogo({ tipo: "excluir-ticket", ticket })} />}
         quadros={quadros}
         quadroId={quadroId}
         aoSelecionar={setQuadroId}
@@ -265,6 +276,24 @@ export function App() {
       />
 
       <main className="canvas">
+        {tela === "atendimento" ? (
+          <>
+            {atend.erro ? (
+              <div className="aviso" role="alert">
+                <span className="aviso-texto"><Icone nome="alerta" tamanho={18} /><span>{atend.erro}</span></span>
+              </div>
+            ) : null}
+            <TelaAtendimento
+              ticketId={atend.ticketId}
+              conversa={atend.conversa}
+              enviando={atend.enviando}
+              aoEnviar={atend.enviar}
+              aoEncerrar={() => atend.mudarStatus("closed")}
+              aoReabrir={() => atend.mudarStatus("open")}
+            />
+          </>
+        ) : (
+          <>
         {erro ? (
           <div className="aviso" role="alert">
             <span className="aviso-texto">
@@ -276,7 +305,20 @@ export function App() {
         ) : null}
 
         {conteudo()}
+          </>
+        )}
       </main>
+
+      {dialogo?.tipo === "excluir-ticket" ? (
+        <Confirmar
+          aberto
+          titulo="Excluir ticket"
+          descricao={`Excluir "${dialogo.ticket.title}" apaga toda a conversa. Não dá para desfazer.`}
+          rotuloConfirmar="Excluir ticket"
+          aoConfirmar={() => { void atend.excluir(dialogo.ticket.id); setDialogo(null); }}
+          aoFechar={() => setDialogo(null)}
+        />
+      ) : null}
 
       {dialogo?.tipo === "novo-quadro" ? (
         <Dialogo aberto titulo="Novo quadro" descricao="Dê um nome para o trabalho que este quadro vai acompanhar." aoFechar={() => setDialogo(null)}>

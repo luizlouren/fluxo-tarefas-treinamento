@@ -58,6 +58,29 @@ const MIGRACOES = [
      ('card-api', 'list-fazendo', 'Montar a API de quadros', 'Boards, listas e cartões com movimentação entre listas.', 0),
      ('card-paleta', 'list-pronto', 'Escolher a paleta de cores', '', 0),
      ('card-metricas', 'list-backlog', 'Medir tempo por cartão', '', 0);`,
+  // Atendimento: cada ticket é uma conversa; author = 'user' | 'agent' (agentes autônomos entram depois).
+  `CREATE TABLE ticket (
+     id TEXT PRIMARY KEY,
+     title TEXT NOT NULL,
+     status TEXT NOT NULL DEFAULT 'open',
+     criado_em TEXT NOT NULL,
+     atualizado_em TEXT NOT NULL
+   );
+   CREATE TABLE ticket_message (
+     id TEXT PRIMARY KEY,
+     ticket_id TEXT NOT NULL REFERENCES ticket(id) ON DELETE CASCADE,
+     author TEXT NOT NULL,
+     content TEXT NOT NULL,
+     criado_em TEXT NOT NULL
+   );
+   INSERT INTO ticket (id, title, status, criado_em, atualizado_em) VALUES
+     ('ticket-boas-vindas', 'Como convidar alguém para um quadro?', 'open', '2026-11-10T10:00:00.000Z', '2026-11-10T10:01:00.000Z');
+   INSERT INTO ticket_message (id, ticket_id, author, content, criado_em) VALUES
+     ('msg-boas-vindas-1', 'ticket-boas-vindas', 'user', 'Olá! Como faço para convidar alguém da minha equipe para um quadro?', '2026-11-10T10:00:00.000Z'),
+     ('msg-boas-vindas-2', 'ticket-boas-vindas', 'agent', 'Olá! Este é um ticket de exemplo. Por enquanto os quadros não têm convites, mas esta conversa já mostra como o atendimento vai funcionar.', '2026-11-10T10:01:00.000Z');`,
+  // Descrição do ticket (campo próprio, como numa issue do GitHub); a conversa continua nas mensagens.
+  `ALTER TABLE ticket ADD COLUMN description TEXT NOT NULL DEFAULT '';
+   UPDATE ticket SET description = (SELECT content FROM ticket_message m WHERE m.ticket_id = ticket.id ORDER BY m.criado_em, m.rowid LIMIT 1) WHERE description = ''`,
 ];
 
 /** `caminho` = arquivo do banco; `:memory:` nos testes. */
