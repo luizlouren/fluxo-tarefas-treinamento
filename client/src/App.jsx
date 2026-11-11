@@ -330,7 +330,7 @@ export function App() {
               if (titulo) void criarQuadro(titulo);
             }}
           >
-            <Campo rotulo="Título do quadro" name="title" maxLength={120} required autoFocus placeholder="Ex.: Lançamento do site" />
+            <Campo rotulo="Título do quadro" name="title" maxLength={120} required autoFocus placeholder="Ex.: Campanha de março" />
             <div className="acoes">
               <Botao onClick={() => setDialogo(null)}>Cancelar</Botao>
               <Botao variante="primario" type="submit">Criar quadro</Botao>

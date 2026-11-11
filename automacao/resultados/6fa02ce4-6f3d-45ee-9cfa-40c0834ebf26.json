@@ -1,0 +1,16 @@
+{
+  "requestId": "6fa02ce4-6f3d-45ee-9cfa-40c0834ebf26",
+  "outcome": "code",
+  "publicText": "Olá! Obrigado pelo pedido. No diálogo \"Novo quadro\", o exemplo do título passa de \"Ex.: Lançamento do site\" para \"Ex.: Campanha de março\". É uma mudança pequena, só no texto de exemplo, e foi enviada para revisão.",
+  "agents": ["n1", "po", "desenvolvedor", "revisor"],
+  "allowedFiles": ["client/src/App.jsx"],
+  "criteria": [
+    { "id": "c1", "description": "O placeholder do campo Título do quadro em client/src/App.jsx é \"Ex.: Campanha de março\" e o npm run build termina sem erro." }
+  ],
+  "review": { "status": "ok", "note": "O diff altera só o placeholder do campo Título do quadro; o build foi rodado pelo desenvolvedor com sucesso." },
+  "updates": [
+    { "id": "u1", "agent": "n1", "internalText": "Pedido entendido: trocar placeholder em App.jsx linha 333.", "publicText": "Entendemos o pedido: trocar o exemplo do título no diálogo Novo quadro para \"Ex.: Campanha de março\"." },
+    { "id": "u2", "agent": "desenvolvedor", "internalText": "Placeholder trocado e npm run build passou.", "publicText": "A alteração foi feita e o build passou." },
+    { "id": "u3", "agent": "revisor", "internalText": "Diff conferido: só o placeholder mudou.", "publicText": "A mudança foi revisada e está pronta para integração." }
+  ]
+}
