@@ -18,6 +18,7 @@ Mantenha o `requestId` e o `resultPath` recebidos no prompt do workflow. Grave e
   "agents": ["n1", "po", "banco"],
   "allowedFiles": [],
   "criteria": [],
+  "review": { "status": "ok", "note": "uma frase do Revisor" },
   "updates": [
     { "id": "u1", "agent": "n1", "internalText": "...", "publicText": "..." }
   ]
@@ -25,7 +26,7 @@ Mantenha o `requestId` e o `resultPath` recebidos no prompt do workflow. Grave e
 ```
 
 - `outcome`: `working` durante o trabalho (só andamento). Ao terminar: `code` (mudança de código), `answered`, `waiting-customer`, `commercial` ou `human-review`.
-- Em `code`: `allowedFiles` lista as fontes alteradas (inclui `server/src/db.js` quando o agente de banco atuou) (só caminhos permitidos pela política) e `criteria` tem um critério objetivo `{ "id": "c1", "description": "..." }`. Teste novo não é obrigatório.
+- Em `code`: `review` vem do Revisor (`status` `ok` ou `fail`, com `note` curta) e é obrigatório; sem `review.status: "ok"` o controlador não integra. `allowedFiles` lista as fontes alteradas (inclui `server/src/db.js` quando o agente de banco atuou) (só caminhos permitidos pela política) e `criteria` tem um critério objetivo `{ "id": "c1", "description": "..." }`. Teste novo não é obrigatório.
 - Nos outros outcomes: sem código, `allowedFiles` e `criteria` vazios.
 - Cada update tem `id` estável, `agent`, `internalText` e `publicText` redigido pelo N1.
 - `agents` é um registro declarado; a transcrição da sessão do Claude mostra as invocações reais.

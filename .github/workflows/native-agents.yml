@@ -1,6 +1,9 @@
-# Atendimento nativo com Claude. Roda sempre o código da main (confiável); nunca executa código de PR com credencial.
+# Atendimento nativo com Claude. Roda sempre o código da main (confiável); o código do PR só é construído num job
+# sem segredos (build), nunca com credencial de controle.
 # Liga com a variável de repositório AGENT_RUNTIME=github-native. Com AGENT_DRY_RUN=true (padrão) o Claude não roda
-# e o controlador só registra no log o que faria. Para valer: secret CLAUDE_CODE_OAUTH_TOKEN e AGENT_DRY_RUN=false.
+# e o controlador só registra no log o que faria. AUTO_MERGE=false (padrão) deixa o PR disponível; true integra o
+# commit conferido (as regras da branch valem, sem bypass), publica a resposta do N1 e fecha a issue.
+# Retomar: Actions -> native-agents -> Run workflow com o número da issue.
 name: native-agents
 
 on:
@@ -80,6 +83,8 @@ jobs:
       contents: read
       issues: write
       pull-requests: read
+    outputs:
+      pr_sha: ${{ steps.and.outputs.pr_sha }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -87,9 +92,96 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node automacao/controlador.mjs andamento
+      - id: and
+        run: node automacao/controlador.mjs andamento
         env:
           GITHUB_TOKEN: ${{ github.token }}
           AGENT_RUNTIME: ${{ vars.AGENT_RUNTIME }}
           AGENT_DRY_RUN: ${{ vars.AGENT_DRY_RUN || 'true' }}
           INPUT_ISSUE: ${{ inputs.issue }}
+
+  # Build do commit atual do PR. Código do PR, então: sem segredos, token só de leitura, sem scripts de instalação.
+  build:
+    needs: andamento
+    if: always() && needs.andamento.result == 'success' && needs.andamento.outputs.pr_sha != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.andamento.outputs.pr_sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - run: npm test
+
+  entrega:
+    needs: [andamento, build]
+    if: always() && needs.andamento.result == 'success' && needs.andamento.outputs.pr_sha != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    outputs:
+      corrigir: ${{ steps.ent.outputs.corrigir }}
+      prompt_correcao: ${{ steps.ent.outputs.prompt_correcao }}
+      pr_branch: ${{ steps.ent.outputs.pr_branch }}
+      issue: ${{ steps.ent.outputs.issue }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - id: ent
+        run: node automacao/controlador.mjs entrega
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          AGENT_RUNTIME: ${{ vars.AGENT_RUNTIME }}
+          AGENT_DRY_RUN: ${{ vars.AGENT_DRY_RUN || 'true' }}
+          AUTO_MERGE: ${{ vars.AUTO_MERGE || 'false' }}
+          BUILD_RESULT: ${{ needs.build.result }}
+          INPUT_ISSUE: ${{ inputs.issue }}
+
+  # No máximo uma rodada automática de correção, no MESMO PR. Depois, o controlador ressalta a pendência ao instrutor.
+  corrigir:
+    needs: entrega
+    if: needs.entrega.outputs.corrigir == 'true' && vars.AGENT_DRY_RUN == 'false'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      actions: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.entrega.outputs.pr_branch }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - uses: anthropics/claude-code-action@v1
+        env:
+          CLAUDE_CODE_DISABLE_BACKGROUND_TASKS: "1"
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ github.token }}
+          prompt: ${{ needs.entrega.outputs.prompt_correcao }}
+          claude_args: |
+            --max-turns 30
+            --allowedTools "Read,Glob,Grep,Edit,Write,Task,Bash(npm run build),Bash(npm test),Bash(git status),Bash(git diff:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*)"
+      # Depois da correção, retoma o mesmo fluxo (build e entrega) pela mesma issue.
+      - run: gh workflow run native-agents.yml -f issue="$ISSUE"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ needs.entrega.outputs.issue }}
