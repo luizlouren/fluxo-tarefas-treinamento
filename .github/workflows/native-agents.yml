@@ -1,0 +1,42 @@
+# Controlador do atendimento nativo. Roda sempre o código da branch main (confiável): nunca faz checkout do código do PR.
+# Liga com a variável de repositório AGENT_RUNTIME=github-native. AGENT_DRY_RUN fica true até o ensaio.
+name: native-agents
+
+on:
+  issues:
+    types: [opened, labeled]
+  pull_request:
+    types: [opened, synchronize, ready_for_review, closed]
+  workflow_dispatch:
+    inputs:
+      issue:
+        description: Número da issue para retomar ou reconciliar
+        required: true
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+concurrency:
+  group: native-agents-${{ github.event.issue.number || github.event.pull_request.number || inputs.issue }}
+  cancel-in-progress: false
+
+jobs:
+  controlar:
+    if: vars.AGENT_RUNTIME == 'github-native'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node automacao/controlador.mjs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          COPILOT_AGENT_TOKEN: ${{ secrets.COPILOT_AGENT_TOKEN }}
+          AGENT_RUNTIME: ${{ vars.AGENT_RUNTIME }}
+          AGENT_DRY_RUN: ${{ vars.AGENT_DRY_RUN || 'true' }}
+          INPUT_ISSUE: ${{ inputs.issue }}

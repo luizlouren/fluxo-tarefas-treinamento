@@ -14,6 +14,7 @@ Um pedido de mudança precisa apenas de: o problema, o resultado esperado e os a
 
 - `client/src/TelaQuadro.jsx`, `Lista.jsx`, `Cartao.jsx`, `ordem.js`
 - `server/src/db.js`: **só o agente `banco`**, e só acrescentando uma migração no fim da lista (sem apagar dados nem editar migrações existentes)
+- `automacao/resultados/<requestId>.json`: só o coordenador, para gravar o relatório do pedido (o `resultPath`)
 - `client/src/estilos.css` (só estilos do quadro)
 - `client/src/App.jsx` (só o trecho de quadros, listas e cartões)
 - `server/src/quadros.js`
@@ -26,7 +27,7 @@ Depois de mudar código: `npm run build` e conferir uma vez o comportamento pedi
 - Login e credenciais: `server/src/auth.js`, `.env*`, tokens e secrets.
 - Banco: `server/dados/` e as tabelas de login (`usuario`, `sessao`). Os outros agentes também não mexem em `server/src/db.js`; isso é só do agente `banco`.
 - Atendimento: `server/src/tickets.js`, `client/src/Atendimento.jsx`, `client/src/BarraLateral.jsx`.
-- Infraestrutura: `.github/` (workflows e agentes), `scripts/`, `vite.config.js`, `package.json`, `package-lock.json`, `automacao/`, `docs/`.
+- Infraestrutura: `.github/` (workflows e agentes), `scripts/`, `vite.config.js`, `package.json`, `package-lock.json`, `automacao/` (exceto `automacao/resultados/`), `docs/`.
 
 ## Regras gerais
 

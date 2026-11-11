@@ -81,6 +81,12 @@ const MIGRACOES = [
   // Descrição do ticket (campo próprio, como numa issue do GitHub); a conversa continua nas mensagens.
   `ALTER TABLE ticket ADD COLUMN description TEXT NOT NULL DEFAULT '';
    UPDATE ticket SET description = (SELECT content FROM ticket_message m WHERE m.ticket_id = ticket.id ORDER BY m.criado_em, m.rowid LIMIT 1) WHERE description = ''`,
+  // Atendimento x GitHub: issue do ticket e só o estado necessário (requestId, PR, fase, ids de mensagens já espelhadas).
+  `ALTER TABLE ticket ADD COLUMN issue_number INTEGER;
+   ALTER TABLE ticket ADD COLUMN request_id TEXT;
+   ALTER TABLE ticket ADD COLUMN pr_url TEXT;
+   ALTER TABLE ticket ADD COLUMN fase TEXT;
+   ALTER TABLE ticket ADD COLUMN mensagens_enviadas TEXT NOT NULL DEFAULT '[]'`,
 ];
 
 /** `caminho` = arquivo do banco; `:memory:` nos testes. */

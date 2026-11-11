@@ -21,3 +21,14 @@
 - Obter plano pago do Copilot (ou o Copilot Pro gratuito para estudantes/professores, via education.github.com/pack) e habilitar o cloud agent.
 - Criar o secret `COPILOT_AGENT_TOKEN` (etapa futura).
 - Sem ticket de teste e sem configuração remota nesta etapa.
+
+## Etapa 03: app, issue e coordenador
+
+- **Fluxo:** ticket no app → backend cria a issue `origin:app` (`server/src/github.js`) e guarda issue, requestId, PR, fase e ids de mensagens já espelhadas na tabela `ticket` → workflow `native-agents.yml` roda `automacao/controlador.mjs` → registra requestId/resultPath e atribui a issue ao Copilot (`custom_agent=coordenador`) → o controlador lê o relatório do PR e publica na issue o resumo interno e a mensagem pública do N1 → o app espelha só as mensagens públicas do `github-actions[bot]`.
+- **Configuração (nada configurado no remoto ainda):** variáveis do repositório `AGENT_RUNTIME=github-native` e `AGENT_DRY_RUN=true`; secret `COPILOT_AGENT_TOKEN` (usuário com Copilot pago); no backend local, `.env.example` (`GITHUB_ISSUES_TOKEN` é outra credencial). Em dry-run nada é escrito no GitHub.
+- **Retomar:** Actions → native-agents → Run workflow com o número da issue.
+- **Conferido localmente:** montagem da atribuição com dados fictícios (`node automacao/controlador.mjs --ensaio`); ticket fictício criado e lido pela API com o app em dry-run (log mostra a issue que seria criada); `npm test` 22/22 e `npm run build` ok.
+- **Não conferido:** chamada real ao GitHub e ao Copilot (plano Free).
+- **Motor antigo:** não existe neste projeto, nada a suspender.
+- **Limite:** o app não tem login, então o ticket não tem "dono" por usuário; quem sabe o id do ticket o lê.
+- **Atenção:** PRs abertos pelo Copilot podem exigir "Approve and run workflows" para o controlador rodar; use o workflow_dispatch se necessário.
