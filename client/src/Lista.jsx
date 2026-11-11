@@ -77,7 +77,7 @@ export function Lista({
             aoApontar={apontar}
           />
         ))}
-        {lista.cards?.length ? null : <p className="lista-vazia">Nenhum cartão nesta lista.</p>}
+        {lista.cards?.length ? null : <p className="lista-vazia">Esta lista ainda não tem cartões.</p>}
       </div>
 
       <div className="lista-rodape">
