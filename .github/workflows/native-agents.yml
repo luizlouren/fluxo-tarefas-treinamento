@@ -1,31 +1,32 @@
-# Controlador do atendimento nativo. Roda sempre o código da branch main (confiável): nunca faz checkout do código do PR.
-# Liga com a variável de repositório AGENT_RUNTIME=github-native. AGENT_DRY_RUN fica true até o ensaio.
+# Atendimento nativo com Claude. Roda sempre o código da main (confiável); nunca executa código de PR com credencial.
+# Liga com a variável de repositório AGENT_RUNTIME=github-native. Com AGENT_DRY_RUN=true (padrão) o Claude não roda
+# e o controlador só registra no log o que faria. Para valer: secret CLAUDE_CODE_OAUTH_TOKEN e AGENT_DRY_RUN=false.
 name: native-agents
 
 on:
   issues:
     types: [opened, labeled]
-  pull_request:
-    types: [opened, synchronize, ready_for_review, closed]
   workflow_dispatch:
     inputs:
       issue:
         description: Número da issue para retomar ou reconciliar
         required: true
 
-permissions:
-  contents: read
-  issues: write
-  pull-requests: read
-
 concurrency:
-  group: native-agents-${{ github.event.issue.number || github.event.pull_request.number || inputs.issue }}
+  group: native-agents-${{ github.event.issue.number || inputs.issue }}
   cancel-in-progress: false
 
 jobs:
-  controlar:
+  registrar:
     if: vars.AGENT_RUNTIME == 'github-native'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: read
+    outputs:
+      executar: ${{ steps.reg.outputs.executar }}
+      prompt: ${{ steps.reg.outputs.prompt }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -33,10 +34,56 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node automacao/controlador.mjs
+      - id: reg
+        run: node automacao/controlador.mjs registrar
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          COPILOT_AGENT_TOKEN: ${{ secrets.COPILOT_AGENT_TOKEN }}
+          AGENT_RUNTIME: ${{ vars.AGENT_RUNTIME }}
+          AGENT_DRY_RUN: ${{ vars.AGENT_DRY_RUN || 'true' }}
+          INPUT_ISSUE: ${{ inputs.issue }}
+
+  claude:
+    needs: registrar
+    if: needs.registrar.outputs.executar == 'true' && vars.AGENT_DRY_RUN == 'false'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ github.token }}
+          prompt: ${{ needs.registrar.outputs.prompt }}
+          claude_args: |
+            --max-turns 40
+            --allowedTools "Read,Glob,Grep,Edit,Write,Task,Bash(npm run build),Bash(npm test),Bash(git status),Bash(git diff:*),Bash(git switch:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(gh pr create:*),Bash(gh issue view:*)"
+
+  andamento:
+    needs: [registrar, claude]
+    if: always() && needs.registrar.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node automacao/controlador.mjs andamento
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
           AGENT_RUNTIME: ${{ vars.AGENT_RUNTIME }}
           AGENT_DRY_RUN: ${{ vars.AGENT_DRY_RUN || 'true' }}
           INPUT_ISSUE: ${{ inputs.issue }}

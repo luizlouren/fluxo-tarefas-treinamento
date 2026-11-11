@@ -27,7 +27,7 @@ Depois de mudar código: `npm run build` e conferir uma vez o comportamento pedi
 - Login e credenciais: `server/src/auth.js`, `.env*`, tokens e secrets.
 - Banco: `server/dados/` e as tabelas de login (`usuario`, `sessao`). Os outros agentes também não mexem em `server/src/db.js`; isso é só do agente `banco`.
 - Atendimento: `server/src/tickets.js`, `client/src/Atendimento.jsx`, `client/src/BarraLateral.jsx`.
-- Infraestrutura: `.github/` (workflows e agentes), `scripts/`, `vite.config.js`, `package.json`, `package-lock.json`, `automacao/` (exceto `automacao/resultados/`), `docs/`.
+- Infraestrutura: `.github/` (workflows), `.claude/` (agentes), `CLAUDE.md`, `scripts/`, `vite.config.js`, `package.json`, `package-lock.json`, `automacao/` (exceto `automacao/resultados/`), `docs/`.
 
 ## Regras gerais
 

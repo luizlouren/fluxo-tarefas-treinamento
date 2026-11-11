@@ -1,6 +1,6 @@
 // Ponte do atendimento com o GitHub: cria a issue do ticket e lê o que o controlador publicou nela.
 // AGENT_RUNTIME=github-native liga; AGENT_DRY_RUN (padrão true) só registra no log, sem chamar o GitHub.
-// Credencial local do backend: GITHUB_ISSUES_TOKEN (só criar/ler issues). Não é o COPILOT_AGENT_TOKEN das Actions.
+// Credencial local do backend: GITHUB_ISSUES_TOKEN (só criar/ler issues). Não é o CLAUDE_CODE_OAUTH_TOKEN das Actions.
 const BOT_CONTROLADOR = "github-actions[bot]";
 
 export const config = () => ({
