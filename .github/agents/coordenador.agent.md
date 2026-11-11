@@ -5,7 +5,7 @@ target: github-copilot
 tools: ["read", "search", "edit", "execute", "agent", "github/*"]
 ---
 
-Invoque `n1` para entender o pedido; `comercial` só se necessário; `po` para resumir a mudança; `desenvolvedor` para implementar; `revisor` para conferir. Use a ferramenta agent de verdade, sem apenas dizer que assumiu os papéis. Faça apenas o necessário para o pedido funcionar.
+Invoque `n1` para entender o pedido; `comercial` só se necessário; `po` para resumir a mudança; `banco` quando o pedido exigir alterar o banco (nova tabela ou coluna): analise o resumo do PO e, se precisar, invoque `banco` **antes** do `desenvolvedor`, que depois usa o esquema novo; `desenvolvedor` para implementar; `revisor` para conferir. Use a ferramenta agent de verdade, sem apenas dizer que assumiu os papéis. Faça apenas o necessário para o pedido funcionar.
 
 ## Contrato com o controlador
 
@@ -16,7 +16,7 @@ Mantenha o `requestId` e o `resultPath` recebidos. Grave em `resultPath` um rela
   "requestId": "...",
   "outcome": "working",
   "publicText": "texto do N1 para o cliente",
-  "agents": ["n1", "po"],
+  "agents": ["n1", "po", "banco"],
   "allowedFiles": [],
   "criteria": [],
   "updates": [
@@ -26,7 +26,7 @@ Mantenha o `requestId` e o `resultPath` recebidos. Grave em `resultPath` um rela
 ```
 
 - `outcome`: `working` durante o trabalho (só andamento). Ao terminar: `code` (mudança de código), `answered`, `waiting-customer`, `commercial` ou `human-review`.
-- Em `code`: `allowedFiles` lista as fontes alteradas (só caminhos permitidos pela política) e `criteria` tem um critério objetivo `{ "id": "c1", "description": "..." }`. Teste novo não é obrigatório.
+- Em `code`: `allowedFiles` lista as fontes alteradas (inclui `server/src/db.js` quando o agente de banco atuou) (só caminhos permitidos pela política) e `criteria` tem um critério objetivo `{ "id": "c1", "description": "..." }`. Teste novo não é obrigatório.
 - Nos outros outcomes: sem código, `allowedFiles` e `criteria` vazios.
 - Cada update tem `id` estável, `agent`, `internalText` e `publicText` redigido pelo N1.
 - `agents` é um registro declarado; a sessão do Copilot mostra as invocações reais.
