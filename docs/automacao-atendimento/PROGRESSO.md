@@ -13,11 +13,11 @@
 ### Acesso ao GitHub Copilot cloud agent
 
 - **Actions:** habilitadas no repositório (`allowed_actions: all`).
-- **Plano do Copilot:** não consegui confirmar por aqui. Pendente: conferir em github.com/settings/copilot se o plano pago está ativo e se o cloud agent está habilitado para o repositório.
+- **Plano do Copilot:** Free (informado pelo usuário). O Copilot cloud agent exige plano pago (Pro, Pro+, Business ou Enterprise), então **fica pendente**. Enquanto isso, os arquivos de agentes (`.github/agents/*.agent.md`) e workflows são montados só localmente.
 - **Secret `COPILOT_AGENT_TOKEN`:** ainda não existe (nenhum secret no repositório). Fica para uma etapa seguinte, separado da credencial local do backend. O valor nunca vai para arquivos ou logs.
 
 ### Pendências
 
-- Confirmar o plano pago do Copilot e o cloud agent.
+- Obter plano pago do Copilot (ou o Copilot Pro gratuito para estudantes/professores, via education.github.com/pack) e habilitar o cloud agent.
 - Criar o secret `COPILOT_AGENT_TOKEN` (etapa futura).
 - Sem ticket de teste e sem configuração remota nesta etapa.
