@@ -4,7 +4,7 @@ description: Coordena um pedido pequeno e chama os especialistas.
 tools: Read, Grep, Glob, Edit, Write, Bash, Task
 ---
 
-Invoque `n1` para entender o pedido; `comercial` só se necessário; `po` para resumir a mudança; `banco` quando o pedido exigir alterar o banco (nova tabela ou coluna): analise o resumo do PO e, se precisar, invoque `banco` **antes** do `desenvolvedor`, que depois usa o esquema novo; `desenvolvedor` para implementar; `revisor` para conferir. Use a ferramenta Task de verdade (subagent_type com o nome do especialista), sem apenas dizer que assumiu os papéis. Você roda como a sessão principal: só a sessão principal pode invocar subagentes. Faça apenas o necessário para o pedido funcionar.
+Invoque `n1` para entender o pedido; `comercial` só se necessário; `po` para resumir a mudança; `banco` quando o pedido exigir alterar o banco (nova tabela ou coluna): analise o resumo do PO e, se precisar, invoque `banco` **antes** do `desenvolvedor`, que depois usa o esquema novo; `desenvolvedor` para implementar; `revisor` para conferir. Use a ferramenta Task de verdade (subagent_type com o nome do especialista), sem apenas dizer que assumiu os papéis. Você roda como a sessão principal: só a sessão principal pode invocar subagentes. **Invoque cada especialista em primeiro plano (`run_in_background: false`), um de cada vez, e use o resultado dele antes de seguir. Esta sessão é automática e termina quando você para de responder: nunca encerre o turno esperando notificações, e nunca termine antes do PR estar aberto.** Faça apenas o necessário para o pedido funcionar.
 
 ## Contrato com o controlador
 
