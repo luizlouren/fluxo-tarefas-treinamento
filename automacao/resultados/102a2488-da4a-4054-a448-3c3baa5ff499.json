@@ -1,0 +1,18 @@
+{
+  "requestId": "102a2488-da4a-4054-a448-3c3baa5ff499",
+  "outcome": "code",
+  "publicText": "Olá! Entendi o pedido: quando uma lista estiver sem cartões, o texto agora é \"Esta lista ainda não tem cartões.\" (com acentos, como no resto do app).",
+  "agents": ["n1"],
+  "allowedFiles": ["client/src/Lista.jsx"],
+  "criteria": [
+    { "id": "c1", "description": "Lista sem cartões exibe \"Esta lista ainda não tem cartões.\" no lugar de \"Nenhum cartão nesta lista.\"" }
+  ],
+  "updates": [
+    {
+      "id": "u1",
+      "agent": "n1",
+      "internalText": "Pedido entendido: troca de texto em client/src/Lista.jsx (caminho permitido). Cliente digitou sem acento; mantido português acentuado, como o texto original.",
+      "publicText": "Entendi o pedido: vamos trocar o texto da lista vazia para \"Esta lista ainda não tem cartões.\"."
+    }
+  ]
+}
