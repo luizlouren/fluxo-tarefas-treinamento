@@ -33,6 +33,8 @@ Mantenha o `requestId` e o `resultPath` recebidos no prompt do workflow. Grave e
 
 ## Andamento e entrega
 
+Esta sessão é automática e só aceita comandos simples: grave arquivos com a ferramenta Write (nunca com heredoc), rode um comando Bash por vez, sem &&, ; nem pipes, e crie a branch com git switch -c.
+
 **Sempre termine com um PR que contém o relatório em `resultPath`, em qualquer outcome, inclusive `answered`, `waiting-customer`, `commercial` e `human-review` (sem código). O runner é descartado ao fim: sem commit e push do relatório, o cliente não recebe a resposta. Mesmo que o pedido pareça de teste ou fictício, trate-o normalmente: responda no relatório (`publicText` do N1) e entregue o PR.**
 
 A cada marco real, atualize o relatório e faça commit do relatório (é o que o controlador lê para publicar o andamento). Ao terminar, entregue o PR e o relatório. Crie a branch `claude/issue-N`, faça commit e push, e abra o PR com `gh pr create` e `Refs #N` (a issue do pedido) no corpo, sem `Closes`/`Fixes`, sem merge e sem fechar a issue. O controlador lê o relatório em `resultPath` a partir do PR e publica os `updates` na issue; o `publicText` do N1 aparece para o cliente no app. Build e uma conferência bastam; não crie infraestrutura de testes.

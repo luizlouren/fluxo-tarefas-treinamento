@@ -74,7 +74,7 @@ jobs:
           prompt: ${{ needs.registrar.outputs.prompt }}
           claude_args: |
             --max-turns 40
-            --allowedTools "Read,Glob,Grep,Edit,Write,Task,Bash(npm run build),Bash(npm test),Bash(git status),Bash(git diff:*),Bash(git switch:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(gh pr create:*),Bash(gh issue view:*)"
+            --allowedTools "Read,Glob,Grep,Edit,Write,Task,Bash(npm run build),Bash(npm test),Bash(git status),Bash(git diff:*),Bash(git switch:*),Bash(git checkout:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(gh pr create:*),Bash(gh issue view:*)"
 
   andamento:
     needs: [registrar, claude]
