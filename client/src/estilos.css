@@ -446,3 +446,6 @@ textarea.campo-entrada { min-height: 96px; resize: vertical; }
 .ticket-form { display: flex; flex-direction: column; gap: var(--e4); width: 100%; max-width: 640px; margin: 0 auto; padding: 0 var(--e6) var(--e8); }
 .ticket-form .campo-entrada { resize: vertical; }
 .ticket-form .acoes { display: flex; justify-content: flex-end; }
+
+.chat-topo-acoes { display: flex; gap: var(--e2); flex: none; }
+.chat-fase { font-size: var(--meta); padding: 2px var(--e2); border-radius: var(--r-cheio); background: var(--oceano-fraco); color: var(--noite); flex: none; }

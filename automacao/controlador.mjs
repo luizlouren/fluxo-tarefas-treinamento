@@ -124,9 +124,10 @@ async function main(modo) {
         if (FINAIS.includes(rel.outcome)) fase = "pronto-para-revisao";
         const ja = (await doBot()).map((c) => c.body).join("\n");
         for (const u of rel.updates ?? []) {
-          if (!/^[\w-]{1,40}$/.test(u.id ?? "") || ja.includes(`app-public:${u.id} `)) continue;
-          await comentar(n, `<!-- app-internal:${u.id} -->\n**${String(u.agent).slice(0, 40)}** (interno): ${String(u.internalText ?? "").slice(0, 1500)}`);
-          await comentar(n, `<!-- app-public:${u.id} -->\n${String(u.publicText ?? "").slice(0, 1000)}`);
+          if (!/^[\w-]{1,40}$/.test(u.id ?? "")) continue;
+          // O agente já pode ter publicado a mensagem durante o trabalho: só completa o que falta.
+          if (!ja.includes(`app-internal:${u.id} `)) await comentar(n, `<!-- app-internal:${u.id} -->\n**${String(u.agent).slice(0, 40)}** (interno): ${String(u.internalText ?? "").slice(0, 1500)}`);
+          if (!ja.includes(`app-public:${u.id} `)) await comentar(n, `<!-- app-public:${u.id} -->\n${String(u.publicText ?? "").slice(0, 1000)}`);
         }
       }
       if (pr.merged_at) fase = "integrado";
@@ -183,7 +184,10 @@ async function main(modo) {
   }
 
   if (SEM_CODIGO_FECHA.includes(rel.outcome)) {
-    if (pr.state === "open") await escrever(`fecharia o PR #${pr.number} (só relatório)`, () => gh("PATCH", `/pulls/${pr.number}`, { state: "closed" }));
+    // O PR leva o relatório e o arquivo de conhecimento: com AUTO_MERGE=true ele é integrado para o conhecimento entrar na main.
+    if (autoMerge && pr.state === "open") {
+      await escrever(`integraria o PR #${pr.number} (relatório e conhecimento)`, () => gh("PUT", `/pulls/${pr.number}/merge`, { sha: pr.head.sha, merge_method: "squash" }));
+    }
     return responderEFechar(false);
   }
   // waiting-customer / human-review: o caso continua aberto; a mensagem pública já foi espelhada pelo andamento.

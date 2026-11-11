@@ -287,6 +287,8 @@ export function App() {
               ticketId={atend.ticketId}
               conversa={atend.conversa}
               enviando={atend.enviando}
+              atualizando={atend.atualizando}
+              aoAtualizar={atend.atualizar}
               aoEnviar={atend.enviar}
               aoEncerrar={() => atend.mudarStatus("closed")}
               aoReabrir={() => atend.mudarStatus("open")}

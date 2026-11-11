@@ -10,7 +10,7 @@ const saidaTicket = (t) => ({ id: t.id, title: t.title, description: t.descripti
 const saidaMensagem = (m) => ({ id: m.id, ticketId: m.ticket_id, author: m.author, content: m.content, createdAt: m.criado_em });
 
 const ultimaSincronia = new Map();
-const INTERVALO_SINCRONIA_MS = 15_000;
+const INTERVALO_SINCRONIA_MS = 5_000;
 
 export function rotasDeTickets(app, db) {
   const buscar = (id) => {
@@ -34,9 +34,9 @@ export function rotasDeTickets(app, db) {
   }));
 
   /** Espelha no ticket as mensagens públicas do N1 e a fase publicadas na issue. Falha de rede não derruba a leitura. */
-  const sincronizar = async (t) => {
+  const sincronizar = async (t, forcar = false) => {
     if (!t.issue_number || t.fase === "concluido") return;
-    if (Date.now() - (ultimaSincronia.get(t.id) ?? 0) < INTERVALO_SINCRONIA_MS) return;
+    if (!forcar && Date.now() - (ultimaSincronia.get(t.id) ?? 0) < INTERVALO_SINCRONIA_MS) return;
     ultimaSincronia.set(t.id, Date.now());
     try {
       const { publicas, estado } = await lerPublicacoes(t.issue_number);
@@ -68,8 +68,8 @@ export function rotasDeTickets(app, db) {
     return { ticket: saidaTicket(db.prepare("SELECT * FROM ticket WHERE id = ?").get(ticket.id)), messages: mensagens(ticket.id) };
   });
 
-  app.get("/api/tickets/:id", async ({ params }) => {
-    await sincronizar(buscar(params.id));
+  app.get("/api/tickets/:id", async ({ params, url }) => {
+    await sincronizar(buscar(params.id), url.searchParams.get("atualizar") === "1");
     return { ticket: saidaTicket(buscar(params.id)), messages: mensagens(params.id) };
   });
 

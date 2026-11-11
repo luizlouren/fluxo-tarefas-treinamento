@@ -11,6 +11,7 @@ export function useAtendimento(ativo) {
   const [ticketId, setTicketId] = useState(null);
   const [conversa, setConversa] = useState(null);
   const [enviando, setEnviando] = useState(false);
+  const [atualizando, setAtualizando] = useState(false);
   const [erro, setErro] = useState(null);
 
   const falhar = (e) => setErro(e.message);
@@ -36,7 +37,7 @@ export function useAtendimento(ativo) {
     const carregar = () =>
       api.tickets.detalhe(ticketId).then((d) => {
         if (!vivo) return;
-        setConversa((atual) => (atual?.messages?.length === d.messages.length && atual?.ticket.status === d.ticket.status && atual?.ticket.title === d.ticket.title ? atual : d));
+        setConversa((atual) => (atual?.messages?.length === d.messages.length && atual?.ticket.status === d.ticket.status && atual?.ticket.title === d.ticket.title && atual?.ticket.phase === d.ticket.phase ? atual : d));
       });
     setConversa(null);
     carregar().then(() => vivo && setErro(null)).catch((e) => vivo && falhar(e));
@@ -65,6 +66,18 @@ export function useAtendimento(ativo) {
     } finally { setEnviando(false); }
   };
 
+  /** Botão "Atualizar": força a busca na issue agora, sem esperar o ciclo automático. */
+  const atualizar = async () => {
+    if (!ticketId) return;
+    setAtualizando(true);
+    try {
+      await executar(async () => {
+        setConversa(await api.tickets.detalhe(ticketId, true));
+        await recarregarLista();
+      });
+    } finally { setAtualizando(false); }
+  };
+
   const mudarStatus = (status) => executar(async () => {
     await api.tickets.mudar(ticketId, { status });
     setConversa(await api.tickets.detalhe(ticketId));
@@ -77,7 +90,7 @@ export function useAtendimento(ativo) {
     await recarregarLista();
   });
 
-  return { tickets, ticketId, conversa, enviando, erro, abrir: setTicketId, novo: () => setTicketId(null), enviar, mudarStatus, excluir };
+  return { tickets, ticketId, conversa, enviando, atualizando, erro, abrir: setTicketId, novo: () => setTicketId(null), enviar, atualizar, mudarStatus, excluir };
 }
 
 const formatarHora = (iso) =>
@@ -185,7 +198,20 @@ function FormularioTicket({ enviando, aoEnviar }) {
 }
 
 /** Tela principal: conversa do ticket aberto, ou o convite para abrir um novo. */
-export function TelaAtendimento({ ticketId, conversa, enviando, aoEnviar, aoEncerrar, aoReabrir }) {
+const FASES = {
+  aberto: "Issue criada",
+  atribuido: "Agentes acionados",
+  "em-andamento": "Em andamento",
+  "pronto-para-revisao": "PR pronto",
+  integrado: "Código integrado",
+  concluido: "Concluído",
+  "aguardando-cliente": "Aguardando você",
+  "revisao-humana": "Com o instrutor",
+  "pendencia-instrutor": "Pendência com o instrutor",
+  encerrado: "Encerrado",
+};
+
+export function TelaAtendimento({ ticketId, conversa, enviando, atualizando, aoEnviar, aoAtualizar, aoEncerrar, aoReabrir }) {
   const fim = useRef(null);
   const total = conversa?.messages?.length ?? 0;
 
@@ -216,10 +242,18 @@ export function TelaAtendimento({ ticketId, conversa, enviando, aoEnviar, aoEnce
         <div className="chat-topo-texto">
           <h1 className="chat-titulo">{ticket.title}</h1>
           <span className="chat-estado" data-status={ticket.status}>{encerrado ? "Encerrado" : "Aberto"}</span>
+          {ticket.phase ? <span className="chat-fase" title="Andamento na issue">{FASES[ticket.phase] ?? ticket.phase}</span> : null}
         </div>
-        {encerrado
-          ? <Botao icone="atualizar" onClick={aoReabrir}>Reabrir</Botao>
-          : <Botao icone="check" onClick={aoEncerrar}>Encerrar ticket</Botao>}
+        <div className="chat-topo-acoes">
+          {ticket.issueNumber ? (
+            <Botao icone="atualizar" disabled={atualizando} aria-label="Atualizar agora" title="Buscar novidades na issue agora" onClick={aoAtualizar}>
+              {atualizando ? "Atualizando…" : "Atualizar"}
+            </Botao>
+          ) : null}
+          {encerrado
+            ? <Botao icone="atualizar" onClick={aoReabrir}>Reabrir</Botao>
+            : <Botao icone="check" onClick={aoEncerrar}>Encerrar ticket</Botao>}
+        </div>
       </header>
 
       <div className="chat-rolagem">

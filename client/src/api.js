@@ -45,7 +45,7 @@ export const api = {
   tickets: {
     listar: () => pedir("GET", "/tickets"),
     criar: (title, description) => pedir("POST", "/tickets", { title, description }),
-    detalhe: (id) => pedir("GET", `/tickets/${id}`),
+    detalhe: (id, forcar = false) => pedir("GET", `/tickets/${id}${forcar ? "?atualizar=1" : ""}`),
     responder: (id, content) => pedir("POST", `/tickets/${id}/messages`, { content }),
     mudar: (id, mudanca) => pedir("PATCH", `/tickets/${id}`, mudanca),
     excluir: (id) => pedir("DELETE", `/tickets/${id}`),
